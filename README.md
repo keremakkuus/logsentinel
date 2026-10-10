@@ -1,10 +1,18 @@
 # LogSentinel
 
+![tests](https://github.com/keremakkuus/logsentinel/actions/workflows/tests.yml/badge.svg)
+![python](https://img.shields.io/badge/python-3.9%2B-blue)
+![license](https://img.shields.io/badge/license-MIT-green)
+
 A small, dependency-free Python tool that reads **SSH auth logs** and **web server access logs**,
 detects common attacks, and explains each finding with a **MITRE ATT&CK** technique, evidence log
 lines, and a recommended action. It writes a terminal summary, JSON, and a self-contained HTML report.
 
 Python 3.9+ and the standard library only. No installation needed.
+
+![Sample HTML report](docs/report.png)
+
+*The HTML report generated from the synthetic sample logs.*
 
 ## Quick start
 
@@ -102,3 +110,7 @@ append it to `DETECTORS`, plant a matching attack in `tools/generate_sample_logs
 
 Store events in PostgreSQL, add a rules file (YAML/JSON) instead of code, enrich IPs with GeoIP,
 add Windows event log support, send alerts by webhook.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
